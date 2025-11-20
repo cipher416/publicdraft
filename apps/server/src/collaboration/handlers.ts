@@ -1,19 +1,20 @@
 import { createDecoder, readVarUint, readVarUint8Array } from "lib0/decoding";
 import {
-    createEncoder,
-    length,
-    toUint8Array,
-    writeVarUint,
-    writeVarUint8Array,
+  createEncoder,
+  length,
+  toUint8Array,
+  writeVarUint,
+  writeVarUint8Array,
 } from "lib0/encoding";
 import { applyAwarenessUpdate } from "y-protocols/awareness";
 import { readSyncMessage } from "y-protocols/sync";
 import { MESSAGE_AWARENESS, MESSAGE_SYNC } from "./constants";
 import {
-    getAwareness,
-    getConnectionInfo,
-    getDocConnections,
-    getOrCreateDoc,
+  getAwareness,
+  getConnectionInfo,
+  getDocConnections,
+  getOrCreateDoc,
+  markDirty,
 } from "./state";
 
 export function broadcastUpdate(
@@ -64,8 +65,8 @@ export function handleMessage(
           ws.sendBinary(Buffer.from(toUint8Array(encoder)));
         }
 
-        // Broadcast updates to other clients (type 2 = update message)
         if (syncMessageType === 2) {
+          markDirty(docName);
           broadcastUpdate(docName, message, userId);
         }
         break;

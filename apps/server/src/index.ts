@@ -16,14 +16,16 @@ import { writeSyncStep1 } from "y-protocols/sync";
 import { MESSAGE_AWARENESS, MESSAGE_SYNC } from "./collaboration/constants";
 import { handleMessage } from "./collaboration/handlers";
 import {
-  cleanupDoc,
+  clearCleanupTimeout,
   deleteConnectionInfo,
-  deleteDocConnections,
   getAwareness,
   getConnectionInfo,
   getDocConnections,
   getOrCreateDoc,
   initDocConnections,
+  initPersistence,
+  kickoffLoad,
+  scheduleCleanup,
   setConnectionInfo,
 } from "./collaboration/state";
 
@@ -46,7 +48,7 @@ const app = new Elysia()
     }
     return status(405);
   })
-  .get("/", () => "OK")
+  .get("/ping", () => "/pong")
   .ws("/collaboration/:docName", {
     async open(ws) {
       const docName = ws.data.params.docName;
@@ -66,6 +68,7 @@ const app = new Elysia()
 
       const userId = session.user.id;
       const connections = initDocConnections(docName);
+      clearCleanupTimeout(docName);
 
       const existingWs = connections.get(userId);
       if (existingWs && existingWs.id !== ws.id) {
@@ -76,6 +79,7 @@ const app = new Elysia()
       connections.set(userId, ws);
 
       const doc = getOrCreateDoc(docName);
+      kickoffLoad(docName);
       const awareness = getAwareness(docName);
       if (!awareness) {
         ws.close();
@@ -152,8 +156,7 @@ const app = new Elysia()
           );
 
           if (connections.size === 0) {
-            deleteDocConnections(docName);
-            cleanupDoc(docName);
+            scheduleCleanup(docName);
           }
         }
       }
@@ -162,6 +165,7 @@ const app = new Elysia()
     },
   })
   .listen(3000, () => {
+    initPersistence();
     console.log("Server is running on http://localhost:3000");
   });
 
