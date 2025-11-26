@@ -12,6 +12,8 @@ export interface PresenceUser {
   color: string;
 }
 
+export type PresenceChangeHandler = (users: PresenceUser[]) => void;
+
 const COLORS = [
   "#f87171",
   "#fb923c",
@@ -28,7 +30,10 @@ function getRandomColor() {
   return COLORS[Math.floor(Math.random() * COLORS.length)];
 }
 
-export function useYjsSync(docName: string) {
+export function useYjsSync(
+  docName: string,
+  options?: { onStatusChange?: (status: string) => void },
+) {
   const [status, setStatus] = useState("disconnected");
   const [synced, setSynced] = useState(false);
   const doc = useMemo(() => new Doc(), [docName]);
@@ -45,11 +50,12 @@ export function useYjsSync(docName: string) {
 
     providerRef.current = wsProvider;
     setProvider(wsProvider);
-
-    wsProvider.on("status", (event: { status: string }) => {
+    const handleStatus = (event: { status: string }) => {
       console.log("WebSocket status:", event.status);
       setStatus(event.status);
-    });
+      options?.onStatusChange?.(event.status);
+    };
+    wsProvider.on("status", handleStatus);
 
     const handleConnectionClose = (
       event: CloseEvent | null,
@@ -65,14 +71,17 @@ export function useYjsSync(docName: string) {
 
     wsProvider.on("connection-close", handleConnectionClose);
 
-    wsProvider.on("sync", (isSynced: boolean) => {
+    const handleSync = (isSynced: boolean) => {
       console.log("Sync status:", isSynced);
       setSynced(isSynced);
-    });
+    };
+    wsProvider.on("sync", handleSync);
 
     return () => {
       // Clean up provider and doc for the previous room
       wsProvider.off("connection-close", handleConnectionClose);
+      wsProvider.off("status", handleStatus);
+      wsProvider.off("sync", handleSync);
       wsProvider.destroy();
       providerRef.current = null;
       setProvider(null);
@@ -83,7 +92,10 @@ export function useYjsSync(docName: string) {
   return { ydoc: doc, provider, status, synced };
 }
 
-export function usePresence(provider: WebsocketProvider | null) {
+export function usePresence(
+  provider: WebsocketProvider | null,
+  options?: { onChange?: PresenceChangeHandler },
+) {
   const [users, setUsers] = useState<PresenceUser[]>([]);
   const [color] = useState(() => getRandomColor());
 
@@ -107,6 +119,7 @@ export function usePresence(provider: WebsocketProvider | null) {
       });
 
       setUsers(userList);
+      options?.onChange?.(userList);
     };
 
     awareness.on("change", updateUsers);
@@ -155,8 +168,8 @@ export function useCollaborativeEditor({
       ],
       editorProps: {
         attributes: {
-          class:
-            "prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4",
+          class: "tiptap-editor focus:outline-none",
+          "data-placeholder": "Start writing together...",
         },
       },
       editable: Boolean(provider),

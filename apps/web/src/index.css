@@ -135,6 +135,62 @@ body {
     }
 }
 
+/* TipTap base styles */
+@layer base {
+    .tiptap-editor .ProseMirror {
+        @apply min-h-[22rem] w-full bg-transparent text-base leading-7 text-foreground outline-none;
+    }
+
+    .tiptap-editor .ProseMirror p + p {
+        @apply mt-3;
+    }
+
+    .tiptap-editor .ProseMirror strong {
+        @apply font-semibold;
+    }
+
+    .tiptap-editor .ProseMirror em {
+        @apply italic;
+    }
+
+    .tiptap-editor .ProseMirror a {
+        @apply text-primary underline decoration-2 underline-offset-4 transition hover:text-primary/80;
+    }
+
+    .tiptap-editor .ProseMirror ul {
+        @apply list-disc pl-6 space-y-1;
+    }
+
+    .tiptap-editor .ProseMirror ol {
+        @apply list-decimal pl-6 space-y-1;
+    }
+
+    .tiptap-editor .ProseMirror code {
+        @apply rounded bg-muted px-1.5 py-0.5 text-sm font-medium text-foreground;
+    }
+
+    .tiptap-editor .ProseMirror pre {
+        @apply my-3 overflow-x-auto rounded-lg bg-muted p-4 text-sm leading-6 text-foreground shadow-inner;
+    }
+
+    .tiptap-editor .ProseMirror blockquote {
+        @apply my-4 border-l-4 border-primary/40 bg-muted/60 px-4 py-2 text-muted-foreground;
+    }
+
+    .tiptap-editor .ProseMirror hr {
+        @apply my-6 border-border;
+    }
+
+    .tiptap-editor .ProseMirror :focus-visible {
+        @apply outline-none ring-2 ring-primary/40 ring-offset-2 ring-offset-background;
+    }
+
+    .tiptap-editor .ProseMirror.is-empty::before {
+        content: attr(data-placeholder);
+        @apply pointer-events-none text-sm text-muted-foreground/70;
+    }
+}
+
 /* Collaboration cursor */
 @layer base {
     .collaboration-cursor__caret {

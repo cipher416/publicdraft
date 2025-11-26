@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "@tanstack/react-router";
 import { FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { CollaborationHeader } from "./collaboration-header";
 import { CreateDocumentDialog } from "./create-document-dialog";
 import { ThemeSwitcher } from "./kibo-ui/theme-switcher";
 
@@ -39,6 +40,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       return data ?? [];
     },
   });
+
+  const isEditor = location.pathname.startsWith("/editor/");
 
   return (
     <>
@@ -97,7 +100,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                               to="/editor/$roomId"
                               params={{ roomId: doc.roomId }}
                             >
-                              <FileText className="h-4 w-4" />
                               <span className="truncate">
                                 {doc.title || doc.roomId}
                               </span>
@@ -120,16 +122,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               />
             </SidebarFooter>
           </Sidebar>
-          <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+
+          <SidebarInset className="flex h-svh flex-col">
+            <header className="flex shrink-0 flex-wrap items-center gap-2 border-b px-3 py-2 sm:h-16 sm:flex-nowrap sm:gap-3 sm:px-4">
               <SidebarTrigger />
-              <div className="flex-1" />
+              <CollaborationHeader showPresence={isEditor} />
               <ThemeSwitcher />
             </header>
-            <main className="flex-1">{children}</main>
+            <main className="w-full flex-1 overflow-y-auto px-3 pb-6 pt-3 sm:px-4 sm:pt-4 min-h-0">
+              {children}
+            </main>
           </SidebarInset>
         </SidebarProvider>
       </SignedIn>
+
       <SignedOut>
         <main className="min-h-svh">{children}</main>
       </SignedOut>
