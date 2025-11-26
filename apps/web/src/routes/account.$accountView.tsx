@@ -1,3 +1,5 @@
+import { updateCollabHeader } from "@/components/collaboration-header/index";
+import type { CollabHeaderState } from "@/components/collaboration-header/store";
 import { requireSessionBeforeLoad } from "@/lib/require-session";
 import {
   AccountSettingsCards,
@@ -11,8 +13,14 @@ export const Route = createFileRoute("/account/$accountView")({
   beforeLoad: requireSessionBeforeLoad,
 });
 
+const ACCOUNT_HEADER_STATE: Partial<CollabHeaderState> = {
+  title: "Account Settings",
+  status: undefined,
+  users: [],
+};
+
 function RouteComponent() {
-  const { accountView } = Route.useParams();
+  updateCollabHeader(ACCOUNT_HEADER_STATE);
 
   return (
     <main className="container flex-col space-y-4 p-4 md:p-6">

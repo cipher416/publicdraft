@@ -1,3 +1,4 @@
+import { updateCollabHeader } from "@/components/collaboration-header/index";
 import { redirectIfAuthenticatedBeforeLoad } from "@/lib/require-session";
 import { cn } from "@/lib/utils";
 import { AuthView } from "@daveyplate/better-auth-ui";
@@ -11,6 +12,13 @@ export const Route = createFileRoute("/auth/$authView")({
 
 function RouteComponent() {
   const { authView } = Route.useParams();
+
+  const title = authView
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+
+  updateCollabHeader({ title, status: undefined, users: [] });
 
   return (
     <main className="flex min-h-svh items-center justify-center bg-background px-4 py-10">
