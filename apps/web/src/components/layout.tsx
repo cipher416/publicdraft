@@ -50,10 +50,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Sidebar>
             <SidebarHeader>
               <div className="flex items-center justify-between gap-2 px-2 py-1">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-6 w-6" />
-                  <span className="font-semibold">PublicDraft</span>
-                </div>
+                <Link to="/">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-6 w-6" />
+                    <span className="font-semibold">PublicDraft</span>
+                  </div>
+                </Link>
               </div>
             </SidebarHeader>
             <SidebarContent>
