@@ -9,10 +9,11 @@
 		"verbatimModuleSyntax": true,
 		"skipLibCheck": true,
 		"types": ["vite/client"],
-		"rootDirs": ["."],
+		"rootDirs": [".", ".."],
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"server": ["../server/src"]
 		}
 	}
 }
