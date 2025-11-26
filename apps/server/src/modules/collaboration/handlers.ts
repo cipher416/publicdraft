@@ -6,10 +6,18 @@ import {
   writeVarUint,
   writeVarUint8Array,
 } from "lib0/encoding";
-import { applyAwarenessUpdate } from "y-protocols/awareness";
+import {
+  applyAwarenessUpdate,
+  encodeAwarenessUpdate,
+} from "y-protocols/awareness";
 import { readSyncMessage } from "y-protocols/sync";
-import { MESSAGE_AWARENESS, MESSAGE_SYNC } from "./constants";
+import {
+  MESSAGE_AWARENESS,
+  MESSAGE_AWARENESS_QUERY,
+  MESSAGE_SYNC,
+} from "./constants";
 import { CollaborationService } from "./service";
+import type { CollaborationSocket } from "./types";
 
 export abstract class CollaborationHandlers {
   static broadcastUpdate(
@@ -34,7 +42,7 @@ export abstract class CollaborationHandlers {
   static handleMessage(
     docName: string,
     message: Uint8Array,
-    ws: any,
+    ws: CollaborationSocket,
     userId: string,
   ): void {
     try {
@@ -95,6 +103,24 @@ export abstract class CollaborationHandlers {
             toUint8Array(awarenessEncoder),
             userId,
           );
+          break;
+        }
+
+        case MESSAGE_AWARENESS_QUERY: {
+          const states = awareness.getStates();
+          console.log(
+            `Awareness query for ${docName} from user ${userId}, states:`,
+            Array.from(states.keys()),
+          );
+          if (states.size === 0) break;
+
+          const encoder = createEncoder();
+          writeVarUint(encoder, MESSAGE_AWARENESS);
+          writeVarUint8Array(
+            encoder,
+            encodeAwarenessUpdate(awareness, Array.from(states.keys())),
+          );
+          ws.sendBinary(Buffer.from(toUint8Array(encoder)));
           break;
         }
       }

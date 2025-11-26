@@ -14,6 +14,7 @@ import { writeSyncStep1 } from "y-protocols/sync";
 import { MESSAGE_AWARENESS, MESSAGE_SYNC } from "./constants";
 import { CollaborationHandlers } from "./handlers";
 import { CollaborationService } from "./service";
+import type { CollaborationSocket } from "./types";
 
 export const collaboration = new Elysia({ name: "collaboration" }).ws(
   "/collaboration/:docName",
@@ -39,8 +40,8 @@ export const collaboration = new Elysia({ name: "collaboration" }).ws(
 
       const existingWs = connections.get(userId);
       if (existingWs && existingWs.id !== ws.id) {
-        console.log(`Closing old connection for user ${userId}`);
-        existingWs.close();
+        ws.close(4009, "Duplicate connection");
+        return;
       }
 
       connections.set(userId, ws);
@@ -67,6 +68,10 @@ export const collaboration = new Elysia({ name: "collaboration" }).ws(
 
       const awarenessStates = awareness.getStates();
       if (awarenessStates.size > 0) {
+        console.log(
+          `Sending initial awareness for ${docName} to user ${userId}:`,
+          Array.from(awarenessStates.keys()),
+        );
         const awarenessEncoder = createEncoder();
         writeVarUint(awarenessEncoder, MESSAGE_AWARENESS);
         writeVarUint8Array(
@@ -93,7 +98,7 @@ export const collaboration = new Elysia({ name: "collaboration" }).ws(
           ? new Uint8Array(message)
           : new Uint8Array(message as Buffer);
 
-      CollaborationHandlers.handleMessage(docName, data, ws, userId);
+      CollaborationHandlers.handleMessage(docName, data, ws as CollaborationSocket, userId);
     },
 
     close(ws) {

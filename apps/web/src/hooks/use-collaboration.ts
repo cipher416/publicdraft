@@ -32,22 +32,38 @@ export function useYjsSync(docName: string) {
   const [status, setStatus] = useState("disconnected");
   const [synced, setSynced] = useState(false);
   const doc = useMemo(() => new Doc(), [docName]);
-  const provider = useRef<WebsocketProvider | null>(null);
+  const providerRef = useRef<WebsocketProvider | null>(null);
+  const [provider, setProvider] = useState<WebsocketProvider | null>(null);
 
   useEffect(() => {
     const wsProvider = new WebsocketProvider(
       "ws://localhost:3000",
       `collaboration/${docName}`,
       doc,
-      { connect: true },
+      { connect: true, disableBc: true },
     );
 
-    provider.current = wsProvider;
+    providerRef.current = wsProvider;
+    setProvider(wsProvider);
 
     wsProvider.on("status", (event: { status: string }) => {
       console.log("WebSocket status:", event.status);
       setStatus(event.status);
     });
+
+    const handleConnectionClose = (
+      event: CloseEvent | null,
+      _provider: WebsocketProvider,
+    ) => {
+      if (event?.code === 4009) {
+        // Another session replaced this one; stop reconnect loop
+        wsProvider.shouldConnect = false;
+        wsProvider.disconnect();
+        setStatus("blocked");
+      }
+    };
+
+    wsProvider.on("connection-close", handleConnectionClose);
 
     wsProvider.on("sync", (isSynced: boolean) => {
       console.log("Sync status:", isSynced);
@@ -56,13 +72,15 @@ export function useYjsSync(docName: string) {
 
     return () => {
       // Clean up provider and doc for the previous room
+      wsProvider.off("connection-close", handleConnectionClose);
       wsProvider.destroy();
-      provider.current = null;
+      providerRef.current = null;
+      setProvider(null);
       setSynced(false);
     };
   }, [docName, doc]);
 
-  return { ydoc: doc, provider: provider.current, status, synced };
+  return { ydoc: doc, provider, status, synced };
 }
 
 export function usePresence(provider: WebsocketProvider | null) {
@@ -117,28 +135,37 @@ export function useCollaborativeEditor({
   provider,
   user,
 }: CollaborativeEditorOptions) {
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        undoRedo: false,
-      }),
-      Collaboration.configure({
-        fragment: ydoc.getXmlFragment("prosemirror"),
-      }),
-      CollaborationCursor.configure({
-        provider,
-        user,
-      }),
-    ],
-    editorProps: {
-      attributes: {
-        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4",
+  const editor = useEditor(
+    {
+      extensions: [
+        StarterKit.configure({
+          undoRedo: false,
+        }),
+        Collaboration.configure({
+          fragment: ydoc.getXmlFragment("prosemirror"),
+        }),
+        ...(provider
+          ? [
+              CollaborationCursor.configure({
+                provider,
+                user,
+              }),
+            ]
+          : []),
+      ],
+      editorProps: {
+        attributes: {
+          class:
+            "prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4",
+        },
       },
+      editable: Boolean(provider),
     },
-  });
+    [provider, ydoc, user.name, user.color],
+  );
 
   useEffect(() => {
-    provider.awareness.setLocalStateField("user", {
+    provider?.awareness.setLocalStateField("user", {
       name: user.name,
       color: user.color,
     });

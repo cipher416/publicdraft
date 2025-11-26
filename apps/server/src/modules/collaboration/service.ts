@@ -3,14 +3,14 @@ import { docs } from "@publicdraft/db/schema/docs";
 import { Awareness } from "y-protocols/awareness";
 import * as Y from "yjs";
 import { Doc } from "yjs";
-import type { ConnectionInfo } from "./types";
+import type { CollaborationSocket, ConnectionInfo } from "./types";
 
 // Document storage
 const docsMap = new Map<string, Doc>();
 const awarenessMap = new Map<string, Awareness>();
 
 // Connection tracking: docName -> (userId -> ws)
-const docConnections = new Map<string, Map<string, any>>();
+const docConnections = new Map<string, Map<string, CollaborationSocket>>();
 
 // Reverse mapping: ws.id -> connection info
 const wsToConnection = new Map<string, ConnectionInfo>();
@@ -43,11 +43,13 @@ export abstract class CollaborationService {
     return awarenessMap.get(docName);
   }
 
-  static getDocConnections(docName: string): Map<string, any> | undefined {
+  static getDocConnections(
+    docName: string,
+  ): Map<string, CollaborationSocket> | undefined {
     return docConnections.get(docName);
   }
 
-  static initDocConnections(docName: string): Map<string, any> {
+  static initDocConnections(docName: string): Map<string, CollaborationSocket> {
     let connections = docConnections.get(docName);
     if (!connections) {
       connections = new Map();
