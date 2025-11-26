@@ -21,10 +21,9 @@ import { z } from "zod";
 const createDocumentSchema = z.object({
   title: z
     .string()
+    .nonempty()
     .trim()
-    .max(120, "Title must be 120 characters or fewer")
-    .optional()
-    .transform((value) => (value ? value : undefined)),
+    .max(120, "Title must be 120 characters or fewer"),
 });
 
 export function CreateDocumentDialog() {
@@ -50,11 +49,11 @@ export function CreateDocumentDialog() {
         throw new Error(error.message || "Failed to create document");
       }
 
-      if (!response?.data) {
+      if (!response) {
         throw new Error("No document returned");
       }
 
-      return response.data;
+      return response;
     },
     onSuccess: (doc) => {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
