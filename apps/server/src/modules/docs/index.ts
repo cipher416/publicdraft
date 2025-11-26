@@ -5,14 +5,12 @@ import { DocsService } from "./service";
 
 export const docs = new Elysia({ prefix: "/docs" })
   .get("/", async () => {
-    const data = await DocsService.getAll();
-    return { data };
+    return await DocsService.getAll();
   })
   .get(
-    "/:roomId",
+    "/:docId",
     async ({ params }) => {
-      const doc = await DocsService.getById(params.roomId);
-      return { success: true as const, data: doc };
+      return await DocsService.getById(params.docId);
     },
     {
       params: DocsModel.params,
@@ -22,19 +20,17 @@ export const docs = new Elysia({ prefix: "/docs" })
     "/",
     async ({ body, request }) => {
       const session = await AuthService.requireAuth(request);
-      const newDoc = await DocsService.create(body, session.user.id);
-      return { success: true as const, data: newDoc[0] };
+      return await DocsService.create(body, session.user.id);
     },
     {
       body: DocsModel.createBody,
     },
   )
   .delete(
-    "/:roomId",
+    "/:docId",
     async ({ params, request }) => {
       await AuthService.requireAuth(request);
-      const deletedDoc = await DocsService.delete(params.roomId);
-      return { success: true as const, data: deletedDoc };
+      return await DocsService.delete(params.docId);
     },
     {
       params: DocsModel.params,

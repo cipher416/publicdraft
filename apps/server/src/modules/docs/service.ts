@@ -33,7 +33,7 @@ export abstract class DocsService {
 
   static async create(input: DocsModel.createBody, createdBy: string) {
     try {
-      return await db
+      const doc = await db
         .insert(docs)
         .values({
           roomId: input.roomId,
@@ -42,6 +42,8 @@ export abstract class DocsService {
           createdBy,
         })
         .returning();
+
+      return doc[0];
     } catch (error) {
       throw status(500, "Failed to create document");
     }

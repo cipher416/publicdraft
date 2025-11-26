@@ -36,7 +36,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         toast.error(error.message || "Failed to load documents");
       }
 
-      return data?.data ?? [];
+      return data ?? [];
     },
   });
 

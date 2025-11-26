@@ -2,7 +2,7 @@ import { t } from "elysia";
 
 export namespace DocsModel {
   export const params = t.Object({
-    roomId: t.String(),
+    docId: t.String(),
   });
 
   export type params = typeof params.static;
