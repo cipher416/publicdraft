@@ -10,12 +10,10 @@
     "start": "bun run dist/index.js"
   },
   "dependencies": {
-    "@elysiajs/cors": "^1.4.0",
     "@publicdraft/auth": "workspace:*",
     "@publicdraft/db": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
-    "elysia": "^1.4.16",
     "zod": "catalog:"
   },
   "trustedDependencies": [
