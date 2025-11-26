@@ -15,7 +15,7 @@ const app = new Elysia()
     cors({
       origin: process.env.CORS_ORIGIN,
       methods: ["GET", "POST", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
+      allowedHeaders: ["Content-Type", "Authorization", "User-Agent"],
       credentials: true,
     }),
   )

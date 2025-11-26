@@ -16,8 +16,16 @@ export namespace DocsModel {
   export type createBody = typeof createBody.static;
 
   export const response = t.Object({
-    success: t.Literal(true),
-    data: t.Any(),
+    data: t.Array(
+      t.Object({
+        id: t.String(),
+        roomId: t.String(),
+        title: t.String(),
+        data: t.String(),
+        createdAt: t.String(),
+        updatedAt: t.String(),
+      }),
+    ),
   });
 
   export type response = typeof response.static;
