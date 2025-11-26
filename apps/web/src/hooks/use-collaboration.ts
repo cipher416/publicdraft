@@ -2,7 +2,7 @@ import Collaboration from "@tiptap/extension-collaboration";
 import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { WebsocketProvider } from "y-websocket";
 import { Doc } from "yjs";
 
@@ -31,15 +31,14 @@ function getRandomColor() {
 export function useYjsSync(docName: string) {
   const [status, setStatus] = useState("disconnected");
   const [synced, setSynced] = useState(false);
-  const ydoc = useRef(new Doc());
+  const doc = useMemo(() => new Doc(), [docName]);
   const provider = useRef<WebsocketProvider | null>(null);
-  const [, forceUpdate] = useState({});
 
   useEffect(() => {
     const wsProvider = new WebsocketProvider(
       "ws://localhost:3000",
       `collaboration/${docName}`,
-      ydoc.current,
+      doc,
       { connect: true },
     );
 
@@ -53,19 +52,17 @@ export function useYjsSync(docName: string) {
     wsProvider.on("sync", (isSynced: boolean) => {
       console.log("Sync status:", isSynced);
       setSynced(isSynced);
-      if (isSynced) {
-        forceUpdate({});
-      }
     });
 
     return () => {
+      // Clean up provider and doc for the previous room
       wsProvider.destroy();
       provider.current = null;
       setSynced(false);
     };
-  }, [docName]);
+  }, [docName, doc]);
 
-  return { ydoc: ydoc.current, provider: provider.current, status, synced };
+  return { ydoc: doc, provider: provider.current, status, synced };
 }
 
 export function usePresence(provider: WebsocketProvider | null) {
@@ -130,6 +127,7 @@ export function useCollaborativeEditor({
       }),
       CollaborationCursor.configure({
         provider,
+        user,
       }),
     ],
     editorProps: {
