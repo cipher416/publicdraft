@@ -26,7 +26,6 @@ export abstract class CollaborationHandlers {
 
     for (const [userId, ws] of connections) {
       if (userId !== excludeUserId) {
-        console.log(`Sending to userId ${userId}`);
         ws.sendBinary(Buffer.from(message));
       }
     }
