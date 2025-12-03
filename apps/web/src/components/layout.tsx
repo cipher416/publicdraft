@@ -18,7 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "@tanstack/react-router";
 import { FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { CollaborationHeader } from "./collaboration-header";
+import { CollaborationHeader } from "./collaboration-header/index";
 import { CreateDocumentDialog } from "./create-document-dialog";
 import { ThemeSwitcher } from "./kibo-ui/theme-switcher";
 

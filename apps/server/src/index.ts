@@ -10,6 +10,8 @@ if (!process.env.CORS_ORIGIN) {
   throw new Error("CORS_ORIGIN environment variable is required");
 }
 
+const port = Number(process.env.PORT) || 3000;
+
 const app = new Elysia()
   .use(
     cors({
@@ -29,9 +31,9 @@ const app = new Elysia()
   })
   .get("/ping", () => "/pong")
 
-  .listen(3000, () => {
+  .listen(port, () => {
     CollaborationService.initPersistence();
-    console.log("Server is running on http://localhost:3000");
+    console.log(`Server is running on http://localhost:${port}`);
   });
 
 export type App = typeof app;

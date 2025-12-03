@@ -1,7 +1,7 @@
 import {
   clearCollabHeader,
   updateCollabHeader,
-} from "@/components/collaboration-header";
+} from "@/components/collaboration-header/index";
 import { api } from "@/lib/api";
 import { requireSessionBeforeLoad } from "@/lib/require-session";
 import { createFileRoute } from "@tanstack/react-router";
