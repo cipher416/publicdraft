@@ -41,8 +41,11 @@ export function useYjsSync(
   const [provider, setProvider] = useState<WebsocketProvider | null>(null);
 
   useEffect(() => {
+    const serverUrl = new URL(import.meta.env.VITE_SERVER_URL!);
+    const wsUrl = `${serverUrl.protocol === "https:" ? "wss" : "ws"}://${serverUrl.host}`;
+
     const wsProvider = new WebsocketProvider(
-      "ws://localhost:3000",
+      wsUrl,
       `collaboration/${docName}`,
       doc,
       { connect: true, disableBc: true },
