@@ -24,9 +24,8 @@
     "dev:server": "turbo -F server dev",
     "build:web": "turbo run build --filter=web",
     "start:web": "turbo run start --filter=web",
-
-    "build:api": "turbo run build --filter=server",
-    "start:api": "turbo run start --filter=server",
+    "build:server": "turbo run build --filter=server",
+    "start:server": "turbo run start --filter=server",
     "db:push": "turbo -F @publicdraft/db db:push",
     "db:studio": "turbo -F @publicdraft/db db:studio",
     "db:generate": "turbo -F @publicdraft/db db:generate",
