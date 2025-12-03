@@ -12,7 +12,7 @@
     ]
   },
   "deploy": {
-    "startCommand": "bun run start:web",
+    "startCommand": "bun run start:server",
     "healthcheckPath": "/ping",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 5
