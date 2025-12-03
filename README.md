@@ -1,5 +1,11 @@
 # publicdraft — toy collaborative editor
 
+Demo:
+
+https://github.com/user-attachments/assets/086e0bdc-6c83-4a50-9359-ab22734771a6
+
+
+
 A small playground that stitches together TanStack Router (React), Elysia (Bun), Yjs, and Tiptap to experiment with real-time shared documents. It’s intentionally lightweight and may change often.
 
 ## Quick start
