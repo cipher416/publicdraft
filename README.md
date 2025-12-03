@@ -1,74 +1,29 @@
-# publicdraft
+# publicdraft — toy collaborative editor
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, Elysia, and more.
+A small playground that stitches together TanStack Router (React), Elysia (Bun), Yjs, and Tiptap to experiment with real-time shared documents. It’s intentionally lightweight and may change often.
 
-## Features
-
-- **TypeScript** - For type safety and improved developer experience
-- **TanStack Router** - File-based routing with full type safety
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **shadcn/ui** - Reusable UI components
-- **Elysia** - Type-safe, high-performance framework
-- **Bun** - Runtime environment
-- **Drizzle** - TypeScript-first ORM
-- **PostgreSQL** - Database engine
-- **Authentication** - Better-Auth
-- **Turborepo** - Optimized monorepo build system
-
-## Getting Started
-
-First, install the dependencies:
+## Quick start
 
 ```bash
 bun install
-```
-## Database Setup
-
-This project uses PostgreSQL with Drizzle ORM.
-
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/server/.env` file with your PostgreSQL connection details.
-
-3. Apply the schema to your database:
-```bash
-bun run db:push
+bun run dev           # runs web on :3001 and API on :3000 via Turborepo
 ```
 
+- Use a `.env` in `apps/server` for `DATABASE_URL` and any CORS origins; see `bun run db:push` to apply the Drizzle schema.
+- Web assumes `VITE_SERVER_URL` when deployed; local dev talks to http://localhost:3000.
 
-Then, run the development server:
+## What’s here
 
-```bash
-bun run dev
-```
+- apps/web: React + TanStack Router frontend with Tiptap collaborative editor.
+- apps/server: Elysia API with Yjs websocket bridge and auth wiring.
+- packages/db, api, auth: shared schema, RPC helpers, and auth config.
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-The API is running at [http://localhost:3000](http://localhost:3000).
+## Deploy (Railway gist)
 
+Two services: server (Bun API) and static web. Railway configs live in `apps/*/railway.json`; there’s a root `railway.json` for one-shot deploys. After provisioning Postgres, run `bun run db:push` against the service, set `CORS_ORIGIN`/`VITE_SERVER_URL`, and redeploy.
 
+## Notes
 
-
-
-
-
-## Project Structure
-
-```
-publicdraft/
-├── apps/
-│   ├── web/         # Frontend application (React + TanStack Router)
-│   └── server/      # Backend API (Elysia)
-├── packages/
-│   ├── api/         # API layer / business logic
-│   ├── auth/        # Authentication configuration & logic
-│   └── db/          # Database schema & queries
-```
-
-## Available Scripts
-
-- `bun run dev`: Start all applications in development mode
-- `bun run build`: Build all applications
-- `bun run dev:web`: Start only the web application
-- `bun run dev:server`: Start only the server
-- `bun run check-types`: Check TypeScript types across all apps
-- `bun run db:push`: Push schema changes to database
-- `bun run db:studio`: Open database studio UI
+- Type checks: `bun run check-types`
+- Build all: `bun run build`
+- No tests yet; treat this as a demo sandbox, not production.
