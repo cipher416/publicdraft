@@ -2,9 +2,9 @@ import { updateCollabHeader } from "@/components/collaboration-header/index";
 import { ThemeSwitcher } from "@/components/kibo-ui/theme-switcher";
 import { redirectIfAuthenticatedBeforeLoad } from "@/lib/require-session";
 import { cn } from "@/lib/utils";
-import { AuthView } from "@daveyplate/better-auth-ui";
+import { AuthView, SignedIn } from "@daveyplate/better-auth-ui";
 import { Dithering } from "@paper-design/shaders-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -38,6 +38,9 @@ function RouteComponent() {
 
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-black px-4 py-10 text-white">
+      <SignedIn>
+        <RedirectHome />
+      </SignedIn>
       <ThemeSwitcher className="absolute top-2 right-2 z-10" />
       <div className="pointer-events-none absolute inset-0">
         <Dithering
@@ -83,4 +86,14 @@ function RouteComponent() {
       </div>
     </main>
   );
+}
+
+function RedirectHome() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.navigate({ to: "/", replace: true });
+  }, [router]);
+
+  return null;
 }
