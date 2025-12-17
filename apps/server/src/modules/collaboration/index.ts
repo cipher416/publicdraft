@@ -26,6 +26,12 @@ export const collaboration = new Elysia({ name: "collaboration" }).ws(
         return;
       }
 
+      console.log("WS open", {
+        id: ws.id,
+        docName: ws.data.params.docName,
+        headers: ws.data.headers,
+      });
+
       const session = await auth.api.getSession({
         headers: new Headers(ws.data.headers as Record<string, string>),
       });
@@ -34,6 +40,12 @@ export const collaboration = new Elysia({ name: "collaboration" }).ws(
         ws.close(4001, "Unauthorized");
         return;
       }
+
+      console.log("WS post auth", {
+        id: ws.id,
+        docName: ws.data.params.docName,
+        headers: ws.data.headers,
+      });
 
       const userId = session.user.id;
       const connections = CollaborationService.initDocConnections(docName);
@@ -98,7 +110,12 @@ export const collaboration = new Elysia({ name: "collaboration" }).ws(
           ? new Uint8Array(message)
           : new Uint8Array(message as Buffer);
 
-      CollaborationHandlers.handleMessage(docName, data, ws as CollaborationSocket, userId);
+      CollaborationHandlers.handleMessage(
+        docName,
+        data,
+        ws as CollaborationSocket,
+        userId,
+      );
     },
 
     close(ws) {
