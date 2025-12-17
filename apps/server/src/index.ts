@@ -15,21 +15,11 @@ if (!process.env.CORS_ORIGIN) {
 
 const port = Number(process.env.PORT) || 3000;
 
-const app = new Elysia()
-  .use(
-    cors({
-      origin: process.env.CORS_ORIGIN,
-      methods: ["GET", "POST", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "User-Agent"],
-      credentials: true,
-    }),
-  )
+// Instrument only HTTP routes; leave WebSocket routes untouched to avoid
+// interfering with upgrade handshakes.
+const tracedHttp = new Elysia()
   .use(
     opentelemetry({
-      // OpenTelemetry plugin currently instruments only HTTP requests; skip WebSocket
-      // upgrade handshakes so they aren't short‑circuited before Elysia's ws handler.
-      checkIfShouldTrace: (request) =>
-        request.headers.get("upgrade")?.toLowerCase() !== "websocket",
       spanProcessors: [
         new BatchSpanProcessor(
           new OTLPTraceExporter({
@@ -43,14 +33,25 @@ const app = new Elysia()
       ],
     }),
   )
-  .use(collaboration)
   .use(docs)
   .all("/api/auth/*", async ({ request, status }) => {
     if (["POST", "GET"].includes(request.method)) {
       return auth.handler(request);
     }
     return status(405);
-  })
+  });
+
+const app = new Elysia()
+  .use(
+    cors({
+      origin: process.env.CORS_ORIGIN,
+      methods: ["GET", "POST", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "User-Agent"],
+      credentials: true,
+    }),
+  )
+  .use(collaboration)
+  .use(tracedHttp)
   .get("/ping", () => "/pong")
   .listen(port, () => {
     CollaborationService.initPersistence();
