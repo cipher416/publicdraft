@@ -26,6 +26,10 @@ const app = new Elysia()
   )
   .use(
     opentelemetry({
+      // OpenTelemetry plugin currently instruments only HTTP requests; skip WebSocket
+      // upgrade handshakes so they aren't short‑circuited before Elysia's ws handler.
+      checkIfShouldTrace: (request) =>
+        request.headers.get("upgrade")?.toLowerCase() !== "websocket",
       spanProcessors: [
         new BatchSpanProcessor(
           new OTLPTraceExporter({
@@ -48,7 +52,6 @@ const app = new Elysia()
     return status(405);
   })
   .get("/ping", () => "/pong")
-
   .listen(port, () => {
     CollaborationService.initPersistence();
     console.log(`Server is running on http://localhost:${port}`);
