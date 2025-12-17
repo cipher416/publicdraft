@@ -1,4 +1,7 @@
 import { cors } from "@elysiajs/cors";
+import { opentelemetry } from "@elysiajs/opentelemetry";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { auth } from "@publicdraft/auth";
 import "dotenv/config";
 import { Elysia } from "elysia";
@@ -19,6 +22,21 @@ const app = new Elysia()
       methods: ["GET", "POST", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "User-Agent"],
       credentials: true,
+    }),
+  )
+  .use(
+    opentelemetry({
+      spanProcessors: [
+        new BatchSpanProcessor(
+          new OTLPTraceExporter({
+            url: "https://api.axiom.co/v1/traces",
+            headers: {
+              Authorization: `Bearer ${process.env.AXIOM_TOKEN}`,
+              "X-Axiom-Dataset": process.env.AXIOM_DATASET!,
+            },
+          }),
+        ),
+      ],
     }),
   )
   .use(collaboration)
