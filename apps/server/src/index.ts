@@ -1,7 +1,4 @@
 import { cors } from "@elysiajs/cors";
-import { opentelemetry } from "@elysiajs/opentelemetry";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { auth } from "@publicdraft/auth";
 import "dotenv/config";
 import { Elysia } from "elysia";
@@ -15,32 +12,6 @@ if (!process.env.CORS_ORIGIN) {
 
 const port = Number(process.env.PORT) || 3000;
 
-// Instrument only HTTP routes; leave WebSocket routes untouched to avoid
-// interfering with upgrade handshakes.
-const tracedHttp = new Elysia()
-  .use(
-    opentelemetry({
-      spanProcessors: [
-        new BatchSpanProcessor(
-          new OTLPTraceExporter({
-            url: "https://api.axiom.co/v1/traces",
-            headers: {
-              Authorization: `Bearer ${process.env.AXIOM_TOKEN}`,
-              "X-Axiom-Dataset": process.env.AXIOM_DATASET!,
-            },
-          }),
-        ),
-      ],
-    }),
-  )
-  .use(docs)
-  .all("/api/auth/*", async ({ request, status }) => {
-    if (["POST", "GET"].includes(request.method)) {
-      return auth.handler(request);
-    }
-    return status(405);
-  });
-
 const app = new Elysia()
   .use(
     cors({
@@ -51,7 +22,13 @@ const app = new Elysia()
     }),
   )
   .use(collaboration)
-  .use(tracedHttp)
+  .use(docs)
+  .all("/api/auth/*", async ({ request, status }) => {
+    if (["POST", "GET"].includes(request.method)) {
+      return auth.handler(request);
+    }
+    return status(405);
+  })
   .get("/ping", () => "/pong")
   .listen(port, () => {
     CollaborationService.initPersistence();
